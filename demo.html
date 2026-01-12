@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMM-Nightscoutcz Demo</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- MagicMirror basic styles -->
+    <style>
+        body {margin: 0;padding: 20px;background-color: #000;color: #fff;font-family: "Roboto Condensed", sans-serif;}
+        .region {position: relative;}
+        .module {margin-bottom: 20px;}
+        .dimmed {color: #666;}
+        .bright {color: #fff;}
+        .small {font-size: 20px;line-height: 25px;}
+        .medium {font-size: 30px;line-height: 35px;}
+        .large {font-size: 65px;line-height: 65px;}
+        .xsmall {font-size: 15px;line-height: 20px;}
+        .demo-controls {position: fixed;top: 10px;right: 10px;background: rgba(255, 255, 255, 0.1);padding: 15px;border-radius: 5px;backdrop-filter: blur(10px);}
+        .demo-controls button {display: block;width: 100%;margin: 5px 0;padding: 10px;background: #4CAF50;color: white;border: none;border-radius: 3px;cursor: pointer;font-size: 14px;}
+        .demo-controls button:hover {background: #45a049;}
+        .demo-controls button.error {background: #f44336;}
+        .demo-controls button.error:hover {background: #da190b;}
+    </style>
+    
+    <!-- Modul styles -->
+    <link rel="stylesheet" href="MMM-Nightscoutcz.css">
+</head>
+<body>
+    <div class="demo-controls">
+        <h3 style="margin-top: 0;">Demo Controls</h3>
+        <button onclick="showLoadingState()">Loading State</button>
+        <button onclick="showNormalData()">Normal Data</button>
+        <button onclick="showHighGlucose()">High Glucose</button>
+        <button onclick="showLowGlucose()">Low Glucose</button>
+        <button onclick="showRisingFast()">Fast Rising</button>
+        <button onclick="showRisingSlow()">Slow Rising</button>
+        <button onclick="showFallingSlow()">Slow Falling</button>
+        <button onclick="showFallingFast()">Fast Falling</button>
+        <button class="error" onclick="showError()">Error State</button>
+    </div>
+    
+    <div class="region top left">
+        <div class="module" id="module-container">
+            <!-- Here the module will be rendered -->
+        </div>
+    </div>
+    
+    <script>
+        // Mock MagicMirror environment
+        var Log = {
+            info: function() { console.log('[INFO]', ...arguments); },
+            log: function() { console.log('[LOG]', ...arguments); },
+            error: function() { console.error('[ERROR]', ...arguments); },
+            warn: function() { console.warn('[WARN]', ...arguments); }
+        };
+        
+        var Module = {
+            register: function(moduleName, moduleDefinition) {
+                console.log('Registering module:', moduleName);
+                
+                // Creating module instance
+                var moduleInstance = Object.assign({
+                    name: moduleName,
+                    identifier: moduleName + '_1',
+                    hidden: false,
+                    config: {
+                        apiUrl: 'https://example.nightscout.cz/api/v1/entries',
+                        apiUsername: 'demo',
+                        apiSecret: 'testsecret',
+                        updateInterval: 60000,
+                        showDate: true
+                    },
+                    glucoseData: null,
+                    data: {
+                        classes: 'bright medium'
+                    },
+                    updateDom: function() {
+                        console.log('[MMM-Nightscoutcz] updateDom called');
+                        renderModule();
+                    },
+                    sendSocketNotification: function(notification, payload) {
+                        console.log('[MMM-Nightscoutcz] Sending notification:', notification, payload);
+                    }
+                }, moduleDefinition);
+                
+                // Initialization
+                if (moduleDefinition.start) {
+                    moduleDefinition.start.call(moduleInstance);
+                }
+                
+                // Global reference for demo functions
+                window.moduleInstance = moduleInstance;
+                
+                // Initial rendering
+                renderModule();
+            }
+        };
+        
+        function renderModule() {
+            var container = document.getElementById('module-container');
+            if (window.moduleInstance && window.moduleInstance.getDom) {
+                var domElement = window.moduleInstance.getDom.call(window.moduleInstance);
+                container.innerHTML = '';
+                container.appendChild(domElement);
+            }
+        }
+        
+        // Helper function to get icon based on direction
+        function getDirectionIcon(direction) {
+            const iconMap = {
+                'DoubleUp': 'angles-up',
+                'SingleUp': 'arrow-up',
+                'FortyFiveUp': 'arrow-turn-up',
+                'Flat': 'arrow-right',
+                'FortyFiveDown': 'arrow-turn-down',
+                'SingleDown': 'arrow-down',
+                'DoubleDown': 'angles-down'
+            };
+            return iconMap[direction] || 'question';
+        }
+        
+        // Demo functions for different states
+        function showLoadingState() {
+            window.moduleInstance.glucoseData = null;
+            window.moduleInstance.loaded = false;
+            window.moduleInstance.updateDom();
+        }
+        
+        function showNormalData() {
+            var now = new Date();
+            var direction = 'Flat';
+            window.moduleInstance.socketNotificationReceived('DATA', {
+                date: now.toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'}),
+                sg: 6,
+                direction: direction,
+                directionIcon: getDirectionIcon(direction)
+            });
+        }
+        
+        function showHighGlucose() {
+            var now = new Date();
+            var direction = 'SingleUp';
+            window.moduleInstance.socketNotificationReceived('DATA', {
+                date: now.toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'}),
+                sg: 12,
+                direction: direction,
+                directionIcon: getDirectionIcon(direction)
+            });
+        }
+        
+        function showLowGlucose() {
+            var now = new Date();
+            var direction = 'SingleDown';
+            window.moduleInstance.socketNotificationReceived('DATA', {
+                date: now.toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'}),
+                sg: 3,
+                direction: direction,
+                directionIcon: getDirectionIcon(direction)
+            });
+        }
+        
+        function showRisingFast() {
+            var now = new Date();
+            var direction = 'DoubleUp';
+            window.moduleInstance.socketNotificationReceived('DATA', {
+                date: now.toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'}),
+                sg: 9,
+                direction: direction,
+                directionIcon: getDirectionIcon(direction)
+            });
+        }
+        
+        function showRisingSlow() {
+            var now = new Date();
+            var direction = 'FortyFiveUp';
+            window.moduleInstance.socketNotificationReceived('DATA', {
+                date: now.toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'}),
+                sg: 7,
+                direction: direction,
+                directionIcon: getDirectionIcon(direction)
+            });
+        }
+        
+        function showFallingSlow() {
+            var now = new Date();
+            var direction = 'FortyFiveDown';
+            window.moduleInstance.socketNotificationReceived('DATA', {
+                date: now.toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'}),
+                sg: 5,
+                direction: direction,
+                directionIcon: getDirectionIcon(direction)
+            });
+        }
+        
+        function showFallingFast() {
+            var now = new Date();
+            var direction = 'DoubleDown';
+            window.moduleInstance.socketNotificationReceived('DATA', {
+                date: now.toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'}),
+                sg: 5,
+                direction: direction,
+                directionIcon: getDirectionIcon(direction)
+            });
+        }
+        
+        function showError() {
+            window.moduleInstance.socketNotificationReceived('ERROR', 'Chyba při načítání dat z API');
+        }
+    </script>
+    
+    <!-- Loading module -->
+    <script src="MMM-Nightscoutcz.js"></script>
+    
+    <script>
+        // Automatically show normal data after loading
+        setTimeout(showNormalData, 500);
+    </script>
+</body>
+</html>

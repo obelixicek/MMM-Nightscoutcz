@@ -1,0 +1,7 @@
+.nightscout-wrapper {text-align: center;}
+.nightscout-wrapper .nightscout-container {display: flex; align-items: center; justify-content: center; gap: 15px;}
+.nightscout-wrapper .direction-icon {font-size: 2em;}
+.nightscout-wrapper .sg-value {font-size: 2.5em; font-weight: bold;}
+.nightscout-wrapper .sg-value .unit {font-size: 0.5em; font-weight: normal; margin-left: 5px;}
+.nightscout-wrapper .time {font-size: 0.8em; opacity: 0.7; position: relative; top: -1em; left: -7em;}
+.nightscout-wrapper .error {color: #ff4444; font-size: 0.9em;}

@@ -1,0 +1,23 @@
+{
+  "name": "mmm-nightscoutcz",
+  "version": "1.0.0",
+  "description": "MagicMirror module for displaying glucose data from Nightscout API",
+  "main": "MMM-Nightscoutcz.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "keywords": [
+    "magicmirror",
+    "module",
+    "nightscout",
+    "glucose",
+    "diabetes"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^4.0.17",
+    "jsdom": "^25.0.1"
+  }
+}
