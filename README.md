@@ -1,6 +1,6 @@
 # MMM-Nightscoutcz
 
-MagicMirror module for displaying glucose data from Nightscout API.
+MagicMirror module for displaying glucose data from Nightscout.cz API.
 
 ## Installation
 
@@ -11,7 +11,7 @@ cd ~/MagicMirror/modules
 
 2. Clone this repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/MMM-Nightscoutcz.git
+git clone https://github.com/obelixicek/MMM-Nightscoutcz.git
 ```
 
 3. Remove development files:
